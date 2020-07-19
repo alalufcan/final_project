@@ -7,13 +7,13 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 # Add your Postgres password into the config.py file
-from config import password
+# from config import password
 
 app = Flask(__name__)
 
 
 # Setup Postgres connection
-engine = create_engine(f'postgresql://postgres:{password}@dbname.cxw2xnixkpbl.ca-central-1.rds.amazonaws.com/postgres')
+engine = create_engine(f'postgresql://postgres:postgres@dbname.cxw2xnixkpbl.ca-central-1.rds.amazonaws.com/postgres')
 
 
 # Reflect an existing database into a new model
