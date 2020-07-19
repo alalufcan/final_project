@@ -7,11 +7,10 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 # Add your Postgres password into the config.py file
-# from config import password
+from config import password
 
 app = Flask(__name__)
 
-password="postgres"
 
 # Setup Postgres connection
 engine = create_engine(f'postgresql://postgres:{password}@dbname.cxw2xnixkpbl.ca-central-1.rds.amazonaws.com/postgres')
@@ -37,18 +36,20 @@ def welcome():
 @app.route("/api/v1.0/hydro")
 def hydrofunc():
     session = Session(engine)
-    results = session.query(hydro.date,hydro.hour,hydro.demanded_toronto,hydro.weekday).all()
+    results = session.query(hydro.date,hydro.hour,hydro.demanded_toronto,hydro.weekday,hydro.previous_hour_demand,hydro.previous_day_demand).all()
 
     session.close()
     
     
     all_hydro = []
-    for date, hour, demanded_toronto, weekday in results:
+    for date, hour, demanded_toronto, weekday, previous_hour_demand, previous_day_demand in results:
         hydro_dict = {}
         hydro_dict["date"] = date
         hydro_dict["hour"] = hour
         hydro_dict["demanded_toronto"] = demanded_toronto
         hydro_dict["weekday"] = weekday
+        hydro_dict["previous_hour_demand"] = previous_hour_demand
+        hydro_dict["previous_day_demand"] = previous_day_demand
         all_hydro.append(hydro_dict)
 
     return jsonify(all_hydro)
@@ -57,12 +58,12 @@ def hydrofunc():
 @app.route("/api/v1.0/weather")
 def weatherfunc():
     session = Session(engine)
-    results = session.query(weather.date,weather.hour,weather.dt,weather.timezone,weather.temp,weather.feels_like,weather.temp_min,weather.temp_max,weather.pressure,weather.humidity,weather.wind_speed,weather.wind_deg,weather.clouds_all,weather.weather_main,weather.weather_description).all()
+    results = session.query(weather.date,weather.hour,weather.dt,weather.timezone,weather.temp,weather.feels_like,weather.temp_min,weather.temp_max,weather.pressure,weather.humidity,weather.wind_speed,weather.wind_deg,weather.clouds_all,weather.weather_main,weather.weather_description,weather.temp_hourly_change,weather.month,weather.temp_daily_change).all()
 
     session.close()
        
     all_weather = []
-    for date,hour,dt,timezone,temp,feels_like,temp_min,temp_max,pressure,humidity,wind_speed,wind_deg,clouds_all,weather_main,weather_description in results:
+    for date,hour,dt,timezone,temp,feels_like,temp_min,temp_max,pressure,humidity,wind_speed,wind_deg,clouds_all,weather_main,weather_description, temp_hourly_change, month, temp_daily_change in results:
         weather_dict = {}
         weather_dict["date"] = date
         weather_dict["hour"] = hour
@@ -79,6 +80,9 @@ def weatherfunc():
         weather_dict["clouds_all"] = clouds_all
         weather_dict["weather_main"] = weather_main
         weather_dict["weather_description"] = weather_description
+        weather_dict["temp_hourly_change"] = temp_hourly_change
+        weather_dict["month"] = month
+        weather_dict["temp_daily_change"] = temp_daily_change
         all_weather.append(weather_dict)
     
     return jsonify(all_weather)
